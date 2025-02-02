@@ -1,0 +1,251 @@
+[
+    {
+        "id": "7fd35a255c083f0e",
+        "type": "tab",
+        "label": "Lueftung",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "d8412034a3f97439",
+        "type": "mqtt in",
+        "z": "7fd35a255c083f0e",
+        "name": "",
+        "topic": "Luft_01",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "127d96a2f9c59841",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "805fe7b44538e34a",
+                "ea65b1ec17cfb54c"
+            ]
+        ]
+    },
+    {
+        "id": "805fe7b44538e34a",
+        "type": "debug",
+        "z": "7fd35a255c083f0e",
+        "name": "debug 41",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "5884bb62da90f25a",
+        "type": "function",
+        "z": "7fd35a255c083f0e",
+        "name": "function 5",
+        "func": "// Daten für innen und außen aus den Flussvariablen abrufen\nlet wert_i = flow.get(\"wert_i\");  // z.B. \"+25,4 098 0850 16123\"\nlet wert_a = flow.get(\"wert_a\");  // z.B. \"+15,3 085 0800 16000\"\n\n// Werte extrahieren\nfunction parseWert(wert) {\n    let temperature = parseFloat(wert.slice(0, 5).replace(\",\", \".\"));\n    let humidity = parseFloat(wert.slice(6, 9));\n    let pressure = parseFloat(wert.slice(10, 14));\n    return { temperature, humidity, pressure };\n}\n\nlet indoor = parseWert(wert_i);\nlet outdoor = parseWert(wert_a);\n\n// Funktion zur Berechnung der absoluten Luftfeuchtigkeit\nfunction absoluteHumidity(temp, relHumidity) {\n    const e = 2.71828;\n    const exp_part = Math.exp((17.67 * temp) / (temp + 243.5));\n    return 6.112 * exp_part * relHumidity * 2.1674 / (273.15 + temp);\n}\n\n// Absolute Feuchtigkeit berechnen\nlet absHumidity_i = absoluteHumidity(indoor.temperature, indoor.humidity);\nlet absHumidity_a = absoluteHumidity(outdoor.temperature, outdoor.humidity);\n\n// Empfehlung berechnen\nlet lueftungsEmpfehlung = absHumidity_i > absHumidity_a ? \"Lüften empfohlen\" : \"Lüften nicht empfohlen\";\n\n// Ergebnis ausgeben\nmsg.payload = {\n    indoor: {\n        temperature: indoor.temperature,\n        humidity: indoor.humidity,\n        pressure: indoor.pressure,\n        absoluteHumidity: absHumidity_i.toFixed(2)\n    },\n    outdoor: {\n        temperature: outdoor.temperature,\n        humidity: outdoor.humidity,\n        pressure: outdoor.pressure,\n        absoluteHumidity: absHumidity_a.toFixed(2)\n    },\n    lueftungsEmpfehlung: lueftungsEmpfehlung\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 480,
+        "wires": [
+            [
+                "e4109a5a3ccd5e62"
+            ]
+        ]
+    },
+    {
+        "id": "ea65b1ec17cfb54c",
+        "type": "function",
+        "z": "7fd35a255c083f0e",
+        "name": "füllt wert_a",
+        "func": "// Den gesamten Payload in die flussweite Variable \"wert_a\" speichern\nflow.set(\"wert_a\", msg.payload);\n\n// Optional: Rückmeldung im msg.payload\nmsg.payload = \"Payload wurde in die flussweite Variable 'wert_a' gespeichert\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 120,
+        "wires": [
+            [
+                "a40600f52fb8a14f"
+            ]
+        ]
+    },
+    {
+        "id": "a40600f52fb8a14f",
+        "type": "debug",
+        "z": "7fd35a255c083f0e",
+        "name": "debug 42",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "e8a19b7bd98ea08a",
+        "type": "mqtt in",
+        "z": "7fd35a255c083f0e",
+        "name": "",
+        "topic": "Luft_02",
+        "qos": "2",
+        "datatype": "utf8",
+        "broker": "127d96a2f9c59841",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 280,
+        "wires": [
+            [
+                "5a765a67b789da15",
+                "137a90ae9eecfbea"
+            ]
+        ]
+    },
+    {
+        "id": "5a765a67b789da15",
+        "type": "debug",
+        "z": "7fd35a255c083f0e",
+        "name": "debug 43",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "137a90ae9eecfbea",
+        "type": "function",
+        "z": "7fd35a255c083f0e",
+        "name": "füllt wert_i",
+        "func": "// Den gesamten Payload in die flussweite Variable \"wert_i\" speichern\nflow.set(\"wert_i\", msg.payload);\n\n// Optional: Rückmeldung im msg.payload\nmsg.payload = \"Payload wurde in die flussweite Variable 'wert_i' gespeichert\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 300,
+        "wires": [
+            [
+                "76ce652f2059e80f"
+            ]
+        ]
+    },
+    {
+        "id": "76ce652f2059e80f",
+        "type": "debug",
+        "z": "7fd35a255c083f0e",
+        "name": "debug 44",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "97e154ed78718920",
+        "type": "inject",
+        "z": "7fd35a255c083f0e",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 480,
+        "wires": [
+            [
+                "5884bb62da90f25a"
+            ]
+        ]
+    },
+    {
+        "id": "e4109a5a3ccd5e62",
+        "type": "debug",
+        "z": "7fd35a255c083f0e",
+        "name": "debug 45",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 720,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "127d96a2f9c59841",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "192.168.178.68",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    }
+]
